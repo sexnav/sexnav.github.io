@@ -1,11 +1,11 @@
-/* SEX123 Navigation: cache UI only; never cache GO or business route configuration. */
-const VERSION = "ntrsp-address-tabler-v1";
+/* SEX123.TOP Publisher: cache static UI only, never cache business route configuration. */
+const VERSION = "sex123-publisher-tabler-v2";
 const UI = ["/", "/index.html", "/assets/vendor/tabler.min.css", "/assets/nav.js", "/assets/favicon.svg", "/offline.html", "/manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(UI)).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith("sex123-nav-") || k.startsWith("ntrsp-address-") && k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => (k.startsWith("sex123-nav-") || k.startsWith("ntrsp-address-") || k.startsWith("sex123-publisher-")) && k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", event => {
   const request = event.request;

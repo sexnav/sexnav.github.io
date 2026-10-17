@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "brand": "NTRSP Address Publisher",
+  "brand": "SEX123.TOP",
   "gateway": "https://sex123.top/",
   "mirrors": [
     {
@@ -51,5 +51,5 @@
     }
   ],
   "probeTimeoutMs": 2800,
-  "description": "NTRSP 官方永久地址发布页镜像：自动探测主备域名，推荐本次响应较快的可用线路。"
+  "description": "SEX123.TOP — NTRSP 专属永久地址发布页镜像，自动检测主备业务域名并推荐本次响应较快的线路。"
 }
