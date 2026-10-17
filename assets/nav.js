@@ -1,13 +1,30 @@
 "use strict";
+/* NTRSP Address Publisher: adapted from the existing SEX123 GO image-probe router. */
 (() => {
-  const grid = document.getElementById("project-grid");
-  const filters = document.getElementById("category-filters");
-  const count = document.getElementById("project-count");
-  const search = document.getElementById("project-search");
-  const mirrors = document.getElementById("mirror-links");
-  let projects = [];
-  let selectedCategory = "全部";
-  let keyword = "";
+  const $ = id => document.getElementById(id);
+  const list = $("route-list");
+  const recommendHost = $("recommend-domain");
+  const recommendDetail = $("recommend-detail");
+  const recommendState = $("recommend-state");
+  const recommendEnter = $("recommend-enter");
+  const recommendCopy = $("recommend-copy");
+  const summary = $("check-summary");
+  const refresh = $("refresh-routes");
+  const mirrorLinks = $("mirror-links");
+  const fallbackRoutes = [
+    { id: "primary", name: "主线路", url: "https://ntrsp.com/", probeUrl: "https://ntrsp.com/wp-includes/images/w-logo-blue.png" },
+    { id: "backup", name: "备用线路", url: "https://439000.xyz/", probeUrl: "https://439000.xyz/wp-includes/images/w-logo-blue.png" }
+  ];
+  const fallbackMirrors = [
+    { name: "Vercel", url: "https://sex123.vercel.app/" },
+    { name: "Cloudflare Pages", url: "https://sex123.pages.dev/" },
+    { name: "GitHub Pages", url: "https://sexnav.github.io/" },
+    { name: "Netlify", url: "https://sex123.netlify.app/" }
+  ];
+  let routes = fallbackRoutes;
+  let checking = false;
+  let generation = 0;
+  let timeoutMs = 2800;
 
   const el = (tag, cls, value) => {
     const node = document.createElement(tag);
@@ -15,100 +32,179 @@
     if (value !== undefined) node.textContent = value;
     return node;
   };
-  const validUrl = (raw) => {
+  function https(raw) {
     try {
-      const u = new URL(raw);
-      return u.protocol === "https:" ? u.href : null;
+      const url = new URL(raw);
+      return url.protocol === "https:" ? url : null;
     } catch { return null; }
-  };
-  const validProject = (p) => p && p.enabled !== false &&
-    typeof p.id === "string" && /^[a-z0-9-]{1,40}$/.test(p.id) &&
-    typeof p.name === "string" && Array.isArray(p.routes) &&
-    p.routes.some(r => validUrl(r.url));
-
-  function drawFilters() {
-    filters.replaceChildren();
-    const categories = ["全部", ...new Set(projects.map(p => p.category || "其他"))];
-    for (const category of categories) {
-      const btn = el("button", "filter" + (selectedCategory === category ? " active" : ""), category);
-      btn.type = "button";
-      btn.setAttribute("aria-pressed", String(selectedCategory === category));
-      btn.addEventListener("click", () => {
-        selectedCategory = category;
-        drawFilters();
-        drawProjects();
-      });
-      filters.append(btn);
+  }
+  function validRoute(route) {
+    if (!route || typeof route.id !== "string") return false;
+    const target = https(route.url), probe = https(route.probeUrl);
+    return Boolean(target && probe && target.origin === probe.origin);
+  }
+  function renderMirrors(mirrors) {
+    mirrorLinks.replaceChildren();
+    for (const mirror of mirrors) {
+      const url = https(mirror.url);
+      if (!url) continue;
+      const a = el("a", "", mirror.name || url.host);
+      a.href = url.href;
+      a.rel = "noopener noreferrer";
+      a.target = "_blank";
+      mirrorLinks.append(a);
     }
   }
-
-  function drawProjects() {
-    const filtered = projects.filter(p => (selectedCategory === "全部" || (p.category || "其他") === selectedCategory) &&
-      (p.name + " " + (p.description || "") + " " + (p.tagline || "")).toLocaleLowerCase().includes(keyword));
-    grid.replaceChildren();
-    count.textContent = String(projects.length).padStart(2, "0");
-    if (!filtered.length) {
-      grid.append(el("div", "empty-state", "没有找到匹配的项目，请调整搜索或分类。"));
+  async function copy(text, button) {
+    const original = button.textContent;
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error("clipboard unavailable");
+      await navigator.clipboard.writeText(text);
+      button.textContent = "已复制 ✓";
+    } catch {
+      try {
+        const input = el("textarea", "", text);
+        input.value = text;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.append(input);
+        input.select();
+        const ok = document.execCommand("copy");
+        input.remove();
+        button.textContent = ok ? "已复制 ✓" : "请手动复制";
+      } catch { button.textContent = "请手动复制"; }
+    }
+    setTimeout(() => { button.textContent = original; }, 1800);
+  }
+  function resetRecommendation(message, state) {
+    recommendHost.textContent = state === "loading" ? "正在检测线路…" : "暂无可确认的可用线路";
+    recommendDetail.textContent = message;
+    recommendState.textContent = state === "loading" ? "检测中" : "未确认";
+    recommendState.className = "status-tag" + (state === "loading" ? "" : " is-error");
+    recommendEnter.removeAttribute("href");
+    recommendEnter.setAttribute("aria-disabled", "true");
+    recommendEnter.className = "recommended-button is-disabled";
+    recommendEnter.textContent = "请从下方手动选择 ↗";
+    recommendCopy.disabled = true;
+  }
+  function showRecommendation(result) {
+    recommendHost.textContent = new URL(result.route.url).host;
+    recommendDetail.textContent = result.route.name + " · 本次探测约 " + result.ms + " ms · 可手动切换其他地址";
+    recommendState.textContent = "本次响应最快";
+    recommendState.className = "status-tag is-ok";
+    recommendEnter.href = result.route.url;
+    recommendEnter.removeAttribute("aria-disabled");
+    recommendEnter.className = "recommended-button";
+    recommendEnter.textContent = "立即访问 ↗";
+    recommendCopy.disabled = false;
+    recommendCopy.onclick = () => copy(result.route.url, recommendCopy);
+  }
+  function renderRoutes(results = []) {
+    list.replaceChildren();
+    const ordered = [...routes].sort((a, b) => {
+      const ar = results.find(r => r.route.id === a.id);
+      const br = results.find(r => r.route.id === b.id);
+      if (!ar && !br) return 0;
+      if (!ar) return 1;
+      if (!br) return -1;
+      if (ar.ok !== br.ok) return ar.ok ? -1 : 1;
+      return ar.ms - br.ms;
+    });
+    for (const route of ordered) {
+      const result = results.find(r => r.route.id === route.id);
+      const row = el("article", "publisher-route" + (result && result.ok && results.filter(r => r.ok).every(r => r.ms >= result.ms) ? " is-best" : ""));
+      const info = el("div", "publisher-route-info");
+      info.append(el("div", "publisher-route-label", route.name || "访问线路"));
+      info.append(el("div", "publisher-route-host", new URL(route.url).host));
+      const state = el("div", "publisher-route-state" + (result ? (result.ok ? " is-ok" : " is-error") : ""),
+        result ? (result.ok ? result.ms + " ms · 可访问探测资源" : "超时或未确认 · 可手动尝试") : "等待检测");
+      info.append(state);
+      const actions = el("div", "publisher-route-actions");
+      const visit = el("a", "", "访问 ↗");
+      visit.href = route.url;
+      visit.rel = "noopener noreferrer";
+      const copyButton = el("button", "", "复制");
+      copyButton.type = "button";
+      copyButton.addEventListener("click", () => copy(route.url, copyButton));
+      actions.append(visit, copyButton);
+      row.append(info, actions);
+      list.append(row);
+    }
+  }
+  function probe(route, timeout) {
+    return new Promise(resolve => {
+      const image = new Image();
+      const started = performance.now();
+      let done = false;
+      let timer;
+      const finish = ok => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        image.onload = null;
+        image.onerror = null;
+        resolve({ route, ok, ms: Math.max(1, Math.round(performance.now() - started)) });
+      };
+      timer = setTimeout(() => finish(false), timeout);
+      image.onload = () => finish(true);
+      image.onerror = () => finish(false);
+      image.referrerPolicy = "no-referrer";
+      const url = new URL(route.probeUrl);
+      url.searchParams.set("_probe", Date.now() + "-" + Math.random().toString(36).slice(2));
+      image.src = url.href;
+    });
+  }
+  async function checkRoutes() {
+    if (checking) return;
+    checking = true;
+    const run = ++generation;
+    refresh.disabled = true;
+    refresh.textContent = "检测中…";
+    resetRecommendation("正在并发检查 NTRSP 主站与备用域名，请稍候。", "loading");
+    summary.textContent = "检测中 · " + routes.length + " 条线路";
+    renderRoutes();
+    if (navigator.onLine === false) {
+      resetRecommendation("设备报告网络离线，恢复网络后请重新检测。", "failed");
+      summary.textContent = "网络离线";
+      refresh.disabled = false;
+      refresh.textContent = "↻ 重新检测";
+      checking = false;
       return;
     }
-    for (const p of filtered) {
-      const card = el("article", "project-card");
-      const top = el("div", "project-top");
-      const icon = el("div", "project-icon", String(p.icon || p.name.slice(0, 1)).slice(0, 2));
-      if (/^#[0-9a-fA-F]{6}$/.test(p.accent || "")) {
-        icon.style.background = "linear-gradient(145deg," + p.accent + ",#7736ab)";
-      }
-      top.append(icon, el("span", "project-category", p.category || "其他"));
-      const title = el("h3", "", p.name);
-      const tagline = el("p", "tagline", p.tagline || "项目网站");
-      const description = el("p", "description", p.description || "");
-      const bottom = el("div", "project-bottom");
-      const routes = p.routes.filter(r => validUrl(r.url));
-      bottom.append(el("span", "route-count", routes.length + " 条已配置线路"));
-      const link = el("a", "enter-link", "智能进入 ↗");
-      link.href = "/go.html?project=" + encodeURIComponent(p.id);
-      link.setAttribute("aria-label", "智能进入 " + p.name);
-      bottom.append(link);
-      card.append(top, title, tagline, description, bottom);
-      grid.append(card);
-    }
+    const results = await Promise.all(routes.map(route => probe(route, timeoutMs)));
+    if (run !== generation) return;
+    const good = results.filter(r => r.ok).sort((a, b) => a.ms - b.ms);
+    renderRoutes(results);
+    if (good.length) showRecommendation(good[0]);
+    else resetRecommendation("所有探测资源均未确认可用，请尝试下方主站或备用地址。", "failed");
+    summary.textContent = "检测完成 " + new Date().toLocaleTimeString("zh-CN", { hour12: false }) + " · " + good.length + "/" + routes.length + " 条线路可确认";
+    refresh.disabled = false;
+    refresh.textContent = "↻ 重新检测";
+    checking = false;
   }
-
-  function drawMirrors(items) {
-    mirrors.replaceChildren();
-    for (const mirror of items || []) {
-      const href = validUrl(mirror.url);
-      if (!href) continue;
-      const a = el("a", "", mirror.name || new URL(href).host);
-      a.href = href;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      mirrors.append(a);
-    }
+  async function initialize() {
+    let mirrors = fallbackMirrors;
+    let configFailed = false;
+    try {
+      const response = await fetch("/config.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("configuration fetch failed");
+      const config = await response.json();
+      const project = Array.isArray(config.projects) ? config.projects.find(p => p.id === "ntrsp" && p.enabled !== false) : null;
+      if (!project || !Array.isArray(project.routes)) throw new Error("NTRSP routes missing");
+      const configured = project.routes.filter(validRoute);
+      if (!configured.length) throw new Error("No valid HTTPS routes");
+      routes = configured;
+      if (Array.isArray(config.mirrors)) mirrors = config.mirrors;
+      if (Number.isFinite(config.probeTimeoutMs)) timeoutMs = Math.max(800, Math.min(6000, config.probeTimeoutMs));
+    } catch { configFailed = true; }
+    renderMirrors(mirrors);
+    if (configFailed) summary.textContent = "配置未加载，使用预置主备地址";
+    refresh.addEventListener("click", checkRoutes);
+    renderRoutes();
+    await checkRoutes();
+    if (configFailed) summary.textContent += " · 配置未加载，使用预置地址";
   }
-
-  search.addEventListener("input", () => {
-    keyword = search.value.trim().toLocaleLowerCase();
-    drawProjects();
-  });
-
-  fetch("/config.json", { cache: "no-store" })
-    .then(response => {
-      if (!response.ok) throw new Error("配置请求失败");
-      return response.json();
-    })
-    .then(data => {
-      if (!Array.isArray(data.projects)) throw new Error("项目配置格式错误");
-      projects = data.projects.filter(validProject);
-      drawFilters();
-      drawProjects();
-      drawMirrors(data.mirrors);
-    })
-    .catch(() => {
-      grid.replaceChildren(el("div", "empty-state", "项目列表暂时无法加载。请刷新页面，或通过永久入口切换其他镜像。"));
-      count.textContent = "—";
-    });
-
+  initialize();
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
   }

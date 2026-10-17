@@ -1,13 +1,13 @@
 {
-  "name": "SEX123 Navigation · 项目导航中心",
-  "short_name": "SEX123 NAV",
+  "name": "NTRSP 永久地址发布页",
+  "short_name": "NTRSP",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "theme_color": "#0a0713",
   "background_color": "#0a0713",
-  "description": "SEX123 多项目导航中心与智能线路选择。",
+  "description": "NTRSP 主站及备用域名智能测速与永久入口发布页。",
   "icons": [
     {
       "src": "/assets/favicon.svg",
