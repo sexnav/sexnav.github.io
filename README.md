@@ -2,7 +2,7 @@
 
 这是 **SEX123.TOP 双层智能入口系统的第二层**，四个平台部署相同的 NTRSP 地址发布页，页面自动检测业务主备域名，并展示本次探测响应较快的推荐线路。
 
-> 当前阶段：在 `feat/ntrsp-address-publisher` 开发分支进行功能验证。通过自动测试和浏览器预览后再合并到 `main`。不要在未验证前切换 `sex123.top` 主域名。
+> 当前状态：**NTRSP 地址发布页已合并至 `main` 并同步部署到 Vercel、Cloudflare Pages、GitHub Pages、Netlify**。`sex123.top` 仍由旧 Vercel 项目托管，尚未切换到新 Gateway。
 
 ## 双层访问流程
 
