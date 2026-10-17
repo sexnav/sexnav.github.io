@@ -1,33 +1,35 @@
-# SEX123 Navigation 镜像迁移记录
+# SEX123 Navigation 镜像迁移与验收
 
-> 原则：先建立并验证新镜像，再切换 Gateway 线路池；保留所有旧项目与域名，不执行删除。
+更新时间：2026-10-17。原则：不删除旧镜像，不在新站验收前切换 Gateway 线路池。
 
 ## 系统边界
 
-- Gateway：`wwvvv/sex123`，主域名 `sex123.top`，负责品牌首页与导航镜像选择。
-- Navigation：本仓库，负责项目导航和 `go.html` 的业务线路路由。
-- 业务目的站：`ntrsp.com`（主）与 `439000.xyz`（备用），不是导航镜像。
+- Gateway：`wwvvv/sex123`，永久域名 `sex123.top`，负责品牌首页及导航镜像选择。
+- Navigation：`sexnav/sexnav.github.io`，负责项目导航和 GO 智能路由。
+- NTRSP 业务域名：`ntrsp.com` 主线路、`439000.xyz` 备用线路，均不是导航镜像。
 
-## 镜像迁移状态（2026-10-17）
+## 四镜像状态
 
-| 平台 | 保留的旧镜像 | 新镜像 | 进度 |
+| 平台 | 新镜像 | 已核实 | 保留的旧镜像 |
 | --- | --- | --- | --- |
-| GitHub Pages | ntrsp.github.io | sexnav.github.io | 账号已改为 sexnav；仓库仍需改名 |
-| Vercel | ntrsp.vercel.app | sex123-nav.vercel.app | 新项目 sex123-nav 已部署 READY |
-| Cloudflare Pages | ntrsp.pages.dev | sex123.pages.dev | 新项目 sex123 已连接 GitHub，生产部署成功 |
-| Netlify | ntrsp.netlify.app | sex123.netlify.app | 新站点已创建并解除 SSO，首次部署/连接 Git 待完成 |
+| GitHub Pages | https://sexnav.github.io | 仓库已改名，Pages 构建成功 | ntrsp.github.io |
+| Vercel | https://sex123.vercel.app | sex123-nav 项目，生产部署 READY、域名已验证 | ntrsp.vercel.app |
+| Cloudflare Pages | https://sex123.pages.dev | sex123 项目，生产部署成功；需持续验证仓库改名后 Git webhook | ntrsp.pages.dev |
+| Netlify | https://sex123.netlify.app | 由用户确认已配置；连接 API 暂无法查到站点，待部署及公开访问验证 | ntrsp.netlify.app |
 
-**Vercel 命名冲突：** `sex123.vercel.app` 已由 `wwvvv/sex123` 所属 Gateway 项目占用，暂时使用 `sex123-nav.vercel.app`，不转移原别名。
+Vercel 还保留 `sex123-nav.vercel.app` 作为额外备用别名。`sex123.vercel.app` 已不再由 Gateway 占用。
 
-## 仍需完成
+## 迁移验收标准
 
-1. 在 GitHub 仓库 Settings → General → Repository name，将 `sexnav/ntrsp.github.io` 改名为 `sexnav/sexnav.github.io`。保持原仓库 ID、main 分支与历史。
-2. 验证 `https://sexnav.github.io/`，如有必要在 Settings → Pages 配置 `main / (root)` 或现有 GitHub Actions 发布方式。
-3. 在 Netlify 新站点 `sex123` 中连接 `sexnav/sexnav.github.io` 的 `main`，发布目录为仓库根目录 `.`，构建命令留空。
-4. 核查仓库改名后 Vercel、Cloudflare Pages 的 GitHub 连接，确认新提交仍自动部署。
-5. 检查所有新镜像首页、静态资源、导航卡片、GO 路由、PWA、HTTPS 和移动端。
-6. 只有四镜像实际通过验收后，才更新 Gateway 镜像配置；旧项目和地址继续保留用于回退。
+1. 所有新镜像能在浏览器直接访问，HTTPS 有效，首页与资源返回正常。
+2. 四平台生产部署同一个 Git 提交，并在下一次 `main` 更新后继续自动部署。
+3. 导航页完成独立品牌化、项目卡片、`go.html?project=ntrsp` 主备业务线路检测、PWA 及手机端测试。
+4. Gateway 的 `sex123.top` 从旧 Vercel 项目迁移到独立 Gateway 项目，需在 Gateway 验证后执行。
+5. 只有新导航镜像全部验收通过后，才把新域名加入 Gateway 的生产线路池。
+6. 旧项目和域名继续保留用于回退，不删除。
 
-## 当前版本说明
+## 当前风险
 
-新镜像目前部署的是迁移阶段的静态源码，**不代表 SEX123 导航 UI 与 GO 路由已经改造完成**。后续品牌和导航开发需独立验证。
+- Netlify API 当前无法定位 `sex123` 站点，不能宣称完成验收。
+- 原导航仓库目前仍是参考项目静态页面，导航中心与多项目 GO 路由尚待实施。
+- 浏览器端跨域测速只能测量探测资源，不保证业务站完整可用，必须提供手动回退。
