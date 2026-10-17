@@ -80,10 +80,10 @@
     recommendHost.textContent = state === "loading" ? "正在检测线路…" : "暂无可确认的可用线路";
     recommendDetail.textContent = message;
     recommendState.textContent = state === "loading" ? "检测中" : "未确认";
-    recommendState.className = "status-tag" + (state === "loading" ? "" : " is-error");
+    recommendState.className = "badge " + (state === "loading" ? "bg-secondary-lt text-secondary" : "bg-red-lt text-red");
     recommendEnter.removeAttribute("href");
     recommendEnter.setAttribute("aria-disabled", "true");
-    recommendEnter.className = "recommended-button is-disabled";
+    recommendEnter.className = "btn btn-primary btn-lg disabled";
     recommendEnter.textContent = "请从下方手动选择 ↗";
     recommendCopy.disabled = true;
   }
@@ -91,10 +91,10 @@
     recommendHost.textContent = new URL(result.route.url).host;
     recommendDetail.textContent = result.route.name + " · 本次探测约 " + result.ms + " ms · 可手动切换其他地址";
     recommendState.textContent = "本次响应最快";
-    recommendState.className = "status-tag is-ok";
+    recommendState.className = "badge bg-green-lt text-green";
     recommendEnter.href = result.route.url;
     recommendEnter.removeAttribute("aria-disabled");
-    recommendEnter.className = "recommended-button";
+    recommendEnter.className = "btn btn-primary btn-lg";
     recommendEnter.textContent = "立即访问 ↗";
     recommendCopy.disabled = false;
     recommendCopy.onclick = () => copy(result.route.url, recommendCopy);
@@ -112,18 +112,18 @@
     });
     for (const route of ordered) {
       const result = results.find(r => r.route.id === route.id);
-      const row = el("article", "publisher-route" + (result && result.ok && results.filter(r => r.ok).every(r => r.ms >= result.ms) ? " is-best" : ""));
-      const info = el("div", "publisher-route-info");
-      info.append(el("div", "publisher-route-label", route.name || "访问线路"));
-      info.append(el("div", "publisher-route-host", new URL(route.url).host));
-      const state = el("div", "publisher-route-state" + (result ? (result.ok ? " is-ok" : " is-error") : ""),
+      const row = el("article", "card flex-column flex-sm-row align-items-start align-items-sm-center" + (result && result.ok && results.filter(r => r.ok).every(r => r.ms >= result.ms) ? " border-primary" : ""));
+      const info = el("div", "card-body flex-grow-1");
+      info.append(el("span", "badge bg-blue-lt text-blue mb-2", route.name || "访问线路"));
+      info.append(el("div", "h3 mb-1 text-break", new URL(route.url).host));
+      const state = el("div", "small " + (result ? (result.ok ? "text-green" : "text-red") : "text-secondary"),
         result ? (result.ok ? result.ms + " ms · 可访问探测资源" : "超时或未确认 · 可手动尝试") : "等待检测");
       info.append(state);
-      const actions = el("div", "publisher-route-actions");
-      const visit = el("a", "", "访问 ↗");
+      const actions = el("div", "d-flex flex-wrap gap-2 p-3 align-items-center");
+      const visit = el("a", "btn btn-sm btn-primary", "访问 ↗");
       visit.href = route.url;
       visit.rel = "noopener noreferrer";
-      const copyButton = el("button", "", "复制");
+      const copyButton = el("button", "btn btn-sm btn-outline-secondary", "复制");
       copyButton.type = "button";
       copyButton.addEventListener("click", () => copy(route.url, copyButton));
       actions.append(visit, copyButton);

@@ -1,6 +1,6 @@
 /* SEX123 Navigation: cache UI only; never cache GO or business route configuration. */
-const VERSION = "ntrsp-address-v2";
-const UI = ["/", "/index.html", "/assets/style.css", "/assets/nav.js", "/assets/favicon.svg", "/offline.html", "/manifest.json"];
+const VERSION = "ntrsp-address-tabler-v1";
+const UI = ["/", "/index.html", "/assets/vendor/tabler.min.css", "/assets/nav.js", "/assets/favicon.svg", "/offline.html", "/manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(UI)).then(() => self.skipWaiting()));
 });
@@ -12,7 +12,7 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === "/config.json" || url.pathname === "/go.html" || url.pathname === "/assets/go.js") {
+  if (url.pathname === "/config.json" || url.pathname === "/go.html" || url.pathname === "/assets/nav.js") {
     event.respondWith(fetch(request, { cache: "no-store" }));
     return;
   }

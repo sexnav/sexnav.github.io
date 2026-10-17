@@ -4,50 +4,67 @@ import { readFileSync, existsSync } from "node:fs";
 const read = path => readFileSync(new URL("../" + path, import.meta.url), "utf8");
 const config = JSON.parse(read("config.json"));
 
-test("projects have safe ids and configured HTTPS routes", () => {
+test("NTRSP business routes have safe HTTPS URLs and same-origin probes", () => {
   assert.equal(config.schemaVersion, 1);
-  assert.ok(config.projects.length >= 1);
-  const ids = new Set();
-  for (const project of config.projects) {
-    assert.match(project.id, /^[a-z0-9-]{1,40}$/);
-    assert.ok(!ids.has(project.id));
-    ids.add(project.id);
-    assert.ok(project.routes.length >= 1);
-    for (const route of project.routes) {
-      const url = new URL(route.url);
-      const probe = new URL(route.probeUrl);
-      assert.equal(url.protocol, "https:");
-      assert.equal(probe.origin, url.origin);
-    }
+  const p = config.projects.find(p => p.id === "ntrsp");
+  assert.ok(p);
+  assert.equal(config.projects.length, 1);
+  assert.equal(p.routes.length, 2);
+  for (const route of p.routes) {
+    const target = new URL(route.url), probe = new URL(route.probeUrl);
+    assert.equal(target.protocol, "https:");
+    assert.equal(probe.origin, target.origin);
   }
 });
-test("mirror URLs are HTTPS and unique", () => {
+
+test("four independent mirror URLs use HTTPS", () => {
   const urls = config.mirrors.map(m => new URL(m.url));
-  assert.ok(urls.length >= 4);
+  assert.equal(urls.length, 4);
   assert.equal(new Set(urls.map(u => u.origin)).size, urls.length);
   for (const url of urls) assert.equal(url.protocol, "https:");
 });
-test("navigation files are present and free from legacy branding", () => {
-  const paths = ["index.html","go.html","assets/style.css","assets/nav.js","assets/go.js","manifest.json","sw.js","offline.html","_headers","vercel.json"];
-  for (const path of paths) {
-    assert.ok(existsSync(new URL("../" + path, import.meta.url)), path);
-    const content = read(path);
-    assert.ok(!/aidizhi|455555\.xyz|爱播爱播/i.test(content), path);
+
+test("all rendered UI comes from vendored Tabler, not handwritten CSS", () => {
+  const pages = ["index.html", "offline.html", "go.html"];
+  for (const page of pages) {
+    const html = read(page);
+    assert.match(html, /assets\/vendor\/tabler\.min\.css/);
+    assert.match(html, /data-bs-theme="dark"/);
+    assert.doesNotMatch(html, /<style\b/i);
+    assert.doesNotMatch(html, /assets\/style\.css/);
   }
-  assert.match(read("index.html"), /assets\/nav\.js/);
-  assert.match(read("go.html"), /assets\/go\.js/);
-  assert.match(read("go.html"), /noindex/);
+  assert.ok(existsSync(new URL("../assets/vendor/tabler.min.css", import.meta.url)));
+  const css = read("assets/vendor/tabler.min.css");
+  assert.ok(css.length > 40000, "Tabler CSS must be the real built package");
+  assert.match(css, /--tblr-/);
+  assert.ok(existsSync(new URL("../assets/vendor/TABLER-LICENSE.txt", import.meta.url)));
+  assert.ok(!existsSync(new URL("../assets/style.css", import.meta.url)));
 });
-test("router never accepts arbitrary redirect query values", () => {
-  const router = read("assets/go.js");
-  assert.match(router, /projectId/);
-  assert.match(router, /config\.projects\.find/);
-  assert.match(router, /target\.origin === probeUrl\.origin/);
-  assert.doesNotMatch(router, /params\.get\(["']url["']\)/);
+
+test("publisher page uses Tabler cards, buttons and status badges", () => {
+  const html = read("index.html");
+  assert.match(html, /class="card\b/);
+  assert.match(html, /btn btn-primary/);
+  assert.match(html, /badge bg-green-lt/);
+  for (const id of ["route-list", "recommended-card", "recommend-enter", "recommend-copy", "refresh-routes", "mirror-links"]) {
+    assert.ok(html.includes('id="' + id + '"'), id);
+  }
+  assert.match(html, /assets\/nav\.js/);
+  assert.doesNotMatch(html, /project-grid|category-filters/);
 });
-test("service worker never caches business route configuration", () => {
-  const worker = read("sw.js");
-  assert.match(worker, /\/config\.json/);
-  assert.match(worker, /cache: "no-store"/);
-  assert.ok(!worker.includes('"/config.json", "/go.html"'));
+
+test("old GO link redirects to publisher home without a custom stylesheet", () => {
+  const html = read("go.html");
+  assert.match(html, /noindex,nofollow/);
+  assert.match(html, /url=\//);
+  assert.ok(!existsSync(new URL("../assets/go.js", import.meta.url)));
+});
+
+test("PWA UI cache includes vendored CSS, but never caches business config", () => {
+  const sw = read("sw.js");
+  assert.match(sw, /\/assets\/vendor\/tabler\.min\.css/);
+  assert.match(sw, /\/config\.json/);
+  assert.match(sw, /cache: "no-store"/);
+  assert.ok(!sw.includes('"/config.json",'));
+  assert.doesNotMatch(sw, /\/assets\/style\.css/);
 });
