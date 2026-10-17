@@ -2,23 +2,20 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; connect-src 'self' https:; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/manifest.json
+  Content-Type: application/manifest+json; charset=utf-8
   Cache-Control: public, max-age=0, must-revalidate
 
 /config.json
   Content-Type: application/json; charset=utf-8
   Cache-Control: no-store, max-age=0
 
-/go.html
-  X-Robots-Tag: noindex, nofollow, noarchive
-  Cache-Control: no-store, max-age=0
-
-/assets/go.js
-  Cache-Control: no-store, max-age=0
-
 /sw.js
   Cache-Control: no-store, max-age=0
   Service-Worker-Allowed: /
-
-/manifest.json
-  Content-Type: application/manifest+json; charset=utf-8

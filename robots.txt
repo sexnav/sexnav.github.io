@@ -1,5 +1,2 @@
 User-agent: *
-Allow: /
-Disallow: /go.html
-Disallow: /config.json
-Disallow: /sw.js
+Disallow:

@@ -5,9 +5,9 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#0a0713",
-  "background_color": "#0a0713",
-  "description": "SEX123.TOP 为 NTRSP 提供主站及备用域名测速与永久地址发布服务。",
+  "theme_color": "#F4F7F9",
+  "background_color": "#F4F7F9",
+  "description": "SEX123.TOP 四平台镜像与 NTRSP 主备线路测速发布页。",
   "icons": [
     {
       "src": "/assets/favicon.svg",

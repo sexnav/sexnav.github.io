@@ -1,55 +1,45 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "brand": "SEX123.TOP",
   "gateway": "https://sex123.top/",
   "mirrors": [
     {
       "id": "github",
       "name": "GitHub Pages",
-      "url": "https://sexnav.github.io/"
+      "url": "https://sexnav.github.io/?view=ntrsp"
     },
     {
       "id": "vercel",
       "name": "Vercel",
-      "url": "https://sex123.vercel.app/"
+      "url": "https://sex123.vercel.app/?view=ntrsp"
     },
     {
       "id": "cloudflare",
       "name": "Cloudflare Pages",
-      "url": "https://sex123.pages.dev/"
+      "url": "https://sex123.pages.dev/?view=ntrsp"
     },
     {
       "id": "netlify",
       "name": "Netlify",
-      "url": "https://sex123.netlify.app/"
+      "url": "https://sex123.netlify.app/?view=ntrsp"
     }
   ],
   "projects": [
     {
       "id": "ntrsp",
       "name": "NTRSP",
-      "category": "影视",
-      "tagline": "影视内容站",
-      "description": "通过智能线路进入 NTRSP，支持主站与备用域名。",
-      "icon": "N",
-      "accent": "#f36ba7",
-      "enabled": true,
       "routes": [
         {
           "id": "primary",
           "name": "主线路",
-          "url": "https://ntrsp.com/",
-          "probeUrl": "https://ntrsp.com/wp-includes/images/w-logo-blue.png"
+          "url": "https://ntrsp.com/"
         },
         {
           "id": "backup",
           "name": "备用线路",
-          "url": "https://439000.xyz/",
-          "probeUrl": "https://439000.xyz/wp-includes/images/w-logo-blue.png"
+          "url": "https://439000.xyz/"
         }
       ]
     }
-  ],
-  "probeTimeoutMs": 2800,
-  "description": "SEX123.TOP — NTRSP 专属永久地址发布页镜像，自动检测主备业务域名并推荐本次响应较快的线路。"
+  ]
 }
