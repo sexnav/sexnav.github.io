@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "brand": "SEX123",
+  "gateway": "https://sex123.top/",
+  "mirrors": [
+    {
+      "id": "github",
+      "name": "GitHub Pages",
+      "url": "https://sexnav.github.io/"
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel",
+      "url": "https://sex123.vercel.app/"
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare Pages",
+      "url": "https://sex123.pages.dev/"
+    },
+    {
+      "id": "netlify",
+      "name": "Netlify",
+      "url": "https://sex123.netlify.app/"
+    }
+  ],
+  "projects": [
+    {
+      "id": "ntrsp",
+      "name": "NTRSP",
+      "category": "影视",
+      "tagline": "影视内容站",
+      "description": "通过智能线路进入 NTRSP，支持主站与备用域名。",
+      "icon": "N",
+      "accent": "#f36ba7",
+      "enabled": true,
+      "routes": [
+        {
+          "id": "primary",
+          "name": "主线路",
+          "url": "https://ntrsp.com/",
+          "probeUrl": "https://ntrsp.com/wp-includes/images/w-logo-blue.png"
+        },
+        {
+          "id": "backup",
+          "name": "备用线路",
+          "url": "https://439000.xyz/",
+          "probeUrl": "https://439000.xyz/wp-includes/images/w-logo-blue.png"
+        }
+      ]
+    }
+  ]
+}

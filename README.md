@@ -1,82 +1,73 @@
 # SEX123 Navigation
 
-> 纯前端多项目导航中心 · 多平台镜像 · GO 智能线路选择（规划与迁移中）
+**纯前端项目导航中心 + GO 智能线路路由**。与独立的 [SEX123 Gateway](https://github.com/wwvvv/sex123) 配合使用。
 
-**SEX123 Navigation** 是 [SEX123.TOP](https://sex123.top/) 永久入口体系的第二层项目。它负责展示项目网站，并在用户选择项目后，通过独立的 GO Router 选择可用的业务线路。
+> 状态：V1 功能已在 `feat/sex123-navigation-v1` 开发分支实现，待 CI、浏览器和四镜像回归后发布正式版。生产环境状态以各平台实际部署为准。
 
-本仓库由 [sexnav](https://github.com/sexnav) 维护，目前处于 **静态站迁移完成、导航功能改造准备阶段**。现有线上页面仍可能包含上游模板的品牌信息和跳转地址；请勿将原模板线路视为 SEX123 已上线的业务线路。
-
-## 架构与仓库分工
+## 访问架构
 
 ```text
-sex123.top                       独立 Gateway / 品牌首页
-  │ 「立即进入」：选择可用导航镜像
-  ▼
-SEX123 Navigation                本仓库的同一份静态代码
-  ├─ sexnav.github.io
-  ├─ sex123.vercel.app
-  ├─ sex123.pages.dev
-  └─ sex123.netlify.app
-       │ 用户选择项目
-       ▼
-     GO Router                   项目级主备业务线路（待改造）
-       ├─ NTRSP 主站：ntrsp.com
-       └─ NTRSP 备用：439000.xyz
+sex123.top (独立 Gateway)
+   └── 点击「立即进入」 → 智能选择 Navigation 镜像
+       ├── https://sexnav.github.io/
+       ├── https://sex123.vercel.app/
+       ├── https://sex123.pages.dev/
+       └── https://sex123.netlify.app/
+             └── 项目卡片 → /go.html?project=ntrsp
+                    ├── https://ntrsp.com/    主业务线路
+                    └── https://439000.xyz/  备用业务线路
 ```
 
-| 职责 | 仓库 | 说明 |
-| --- | --- | --- |
-| 品牌 Gateway | [wwvvv/sex123](https://github.com/wwvvv/sex123) | `sex123.top` 的独立入口页、镜像检查、进入导航中心 |
-| 项目导航 | **[sexnav/sexnav.github.io](https://github.com/sexnav/sexnav.github.io)** | 项目卡片、类别、GO 路由与静态导航资源 |
-| 业务网站 | 独立部署 | `ntrsp.com` 和 `439000.xyz` 是 NTRSP 业务线路，不是本仓库的镜像 |
+导航镜像与业务域名是两种不同的地址。四个平台发布的是同一份 Navigation 静态页面；`ntrsp.com` 和 `439000.xyz` 是 WordPress 业务站入口。
 
-## 导航镜像
+## V1 功能
 
-以下为计划长期使用的地址。**部署成功仅代表静态镜像已发布，不代表新版导航页面及全部功能已经完成验收。**
+- 响应式暗黑导航 UI、项目搜索与分类过滤。
+- JSON 配置的多项目卡片与镜像列表，首个项目 NTRSP。
+- 通用 GO Router：`/go.html?project=<id>`，仅允许配置中存在的项目，拒绝任意 URL 参数跳转。
+- 并发探测业务线路上的 HTTPS 图片资源，在 2.5 秒内选择成功且响应较快的线路。
+- 内置浏览器识别、手动线路选择、超时或资源探测失败时不强制跳转。
+- PWA 静态 UI 缓存、离线提示；**不缓存项目配置或 GO 跳转页**，避免过期业务地址。
+- 独立 SEO / CSP / 安全响应头，不再使用上游品牌、旧 APK 或旧邮件地址。
 
-| 托管平台 | 地址 | 已知状态 |
-| --- | --- | --- |
-| GitHub Pages | [sexnav.github.io](https://sexnav.github.io/) | 仓库改名成功，Pages 部署正常 |
-| Vercel | [sex123.vercel.app](https://sex123.vercel.app/) | 新项目 `sex123-nav` 绑定成功、生产部署已验证 |
-| Cloudflare Pages | [sex123.pages.dev](https://sex123.pages.dev/) | GitHub 自动部署已验证 |
-| Netlify | [sex123.netlify.app](https://sex123.netlify.app/) | 镜像项目已配置，首次正式发布及同步验证中 |
+**测速说明**：浏览器的图片探测不等于 Ping，也不能保证 WordPress 的登录、播放等业务功能正常。项目配置中的 `probeUrl` 必须是真实存在、允许浏览器加载的同源图片；如果图片不存在或被反盗链拦截，GO 将显示手动线路选项，而不会盲目跳转。当前使用 WordPress 核心图片路径，正式验收时必须从实际网络验证。
 
-额外回退地址：`sex123-nav.vercel.app`。旧 `ntrsp.*` 项目暂不删除。详细迁移记录见 [MIRROR_MIGRATION.md](MIRROR_MIGRATION.md)。
+## 目录
 
-## 技术方案
+```text
+index.html               项目导航主页
+go.html                  通用 GO 跳转页
+config.json              项目、镜像、主备业务域名
+assets/style.css         视觉样式
+assets/nav.js            项目列表、搜索、分类
+assets/go.js             业务线路探测与跳转
+assets/favicon.svg       品牌图标
+manifest.json / sw.js    PWA 与离线缓存
+offline.html             离线提示
+_headers / vercel.json   各平台安全响应头
+tests/static.test.mjs    静态配置与安全回归
+```
 
-- 纯静态 HTML5、CSS3、Vanilla JavaScript，前期不引入数据库或服务端 API。
-- 一份 Navigation 源码，连接 GitHub Pages / Vercel / Cloudflare Pages / Netlify 自动部署。
-- Gateway 与 Navigation 独立发布；镜像切换不影响业务 WordPress 站点。
-- 项目目录、主备业务线路将集中到 JSON 配置文件维护。
-- GO Router 计划支持并发静态资源检查、超时回退、历史成功线路记录以及内置浏览器提示。
-- 浏览器资源探测只能辅助判断可访问性，不能保证目标业务流程完全健康；保留手动切换入口。
-- PWA 与缓存仍在改造评估中，避免缓存陈旧业务地址。
-
-## 项目阶段
-
-| 阶段 | 范围 | 状态 |
-| --- | --- | --- |
-| 0 | 源码迁移、GitHub 账号与仓库更名、镜像初始化 | 基本完成 |
-| 1 | 清理旧品牌及无关文件、统一配置、设计 Navigation UI | 待实施 |
-| 2 | 多项目导航卡片及 `go.html?project=...` 业务线路选择 | 待实施 |
-| 3 | Gateway「立即进入」选择最快可用导航镜像 | 待实施（位于独立 Gateway 仓库） |
-| 4 | 四镜像浏览器回归、PWA、安全与性能优化 | 待完整验收 |
-
-## 开发与预览
+## 本地开发
 
 ```bash
 git clone https://github.com/sexnav/sexnav.github.io.git
 cd sexnav.github.io
 python3 -m http.server 8080
+# 浏览器打开 http://localhost:8080/
+node --test tests/static.test.mjs
 ```
 
-浏览器打开 `http://localhost:8080/`。
+无需 Node 依赖、数据库、后台或构建工具；Node 仅用于运行测试。
 
-当前仓库来自纯静态模板，本地预览不要求构建。生产部署使用 `main` 分支，具体部署状态请以各平台控制台为准。
+## 新增项目
 
-## 开源来源与许可
+编辑 `config.json` 的 `projects` 数组，提供唯一 `id`、名称、分类和 HTTPS 业务线路。每条线路包含 `url` 与其同源的 `probeUrl`。前端不会执行配置之外的任意外链跳转。
 
-本仓库早期版本基于 [aidizhi/aidizhi.github.io](https://github.com/aidizhi/aidizhi.github.io) 修改，感谢上游作者提供的发布页模板和多线路跳转思路。原始作者的版权与 MIT 许可声明保留于仓库 [LICENSE](LICENSE)。
+## 部署与回退
 
-此 README 描述 **SEX123 的现行定位与开发计划**，不再将上游项目的站点、邮箱、业务地址或功能声明误作本项目现有服务。
+`main` 为正式生产分支；功能分支完成测试后合并。Vercel、Cloudflare Pages、Netlify 的构建命令留空、发布目录 `.`；GitHub Pages 使用用户主页仓库 `sexnav/sexnav.github.io`。迁移记录见 [MIRROR_MIGRATION.md](MIRROR_MIGRATION.md)。
+
+## 开源许可
+
+本项目早期版本基于 [aidizhi/aidizhi.github.io](https://github.com/aidizhi/aidizhi.github.io)（MIT）改造，保留原始许可声明于 [LICENSE](LICENSE)，感谢原作者的静态发布页和线路跳转思路。
