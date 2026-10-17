@@ -50,3 +50,7 @@ node --test tests/*.test.mjs
 ## 版权
 
 早期版本源于 [aidizhi/aidizhi.github.io](https://github.com/aidizhi/aidizhi.github.io)（MIT），保留仓库根目录 [LICENSE](LICENSE)；Tabler UI 许可证见 `assets/vendor/TABLER-LICENSE.txt`。
+
+## Tabler 本地化校验
+
+版本 `@tabler/core@1.6.1`，从官方 npm 发布包提取编译后的 `assets/vendor/tabler.min.css`（635,394 bytes），并保存到 Git 仓库。四个平台均直接加载本地 CSS，不需要访问 jsDelivr / unpkg。旧手写样式已删除。此版本先在开发分支验证，正式镜像暂时不变。
