@@ -2,7 +2,7 @@
 
 **纯前端项目导航中心 + GO 智能线路路由**。与独立的 [SEX123 Gateway](https://github.com/wwvvv/sex123) 配合使用。
 
-> 状态：V1 功能已在 `feat/sex123-navigation-v1` 开发分支实现，待 CI、浏览器和四镜像回归后发布正式版。生产环境状态以各平台实际部署为准。
+> 状态：**Navigation V1 已合并到 `main` 并部署到四个平台**。静态测试与 GO 路由行为测试通过；业务域名的真实可达性仍需在终端网络中验收。
 
 ## 访问架构
 
@@ -45,7 +45,7 @@ assets/favicon.svg       品牌图标
 manifest.json / sw.js    PWA 与离线缓存
 offline.html             离线提示
 _headers / vercel.json   各平台安全响应头
-tests/static.test.mjs    静态配置与安全回归
+tests/*.test.mjs         静态配置、安全与 GO 路由行为回归
 ```
 
 ## 本地开发
