@@ -3,34 +3,54 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0a0713"><meta name="referrer" content="no-referrer">
-<meta name="robots" content="noindex,follow"><meta name="description" content="SEX123 Navigation — 多项目导航中心，通过智能线路访问各项目网站。">
-<meta property="og:title" content="SEX123 · Navigation"><meta property="og:description" content="一个入口，连接更多项目。"><meta property="og:type" content="website"><meta property="og:url" content="https://sexnav.github.io/">
+<meta name="robots" content="noindex,follow"><meta name="description" content="NTRSP 官方永久地址发布页。自动检测主备线路，推荐本次响应更快的可用地址。">
+<meta property="og:title" content="NTRSP · 永久地址发布页"><meta property="og:description" content="主站与备用地址智能测速，收藏 SEX123.TOP 防止失联。"><meta property="og:type" content="website"><meta property="og:url" content="https://sexnav.github.io/">
 <link rel="canonical" href="https://sexnav.github.io/"><link rel="icon" type="image/svg+xml" href="/assets/favicon.svg"><link rel="manifest" href="/manifest.json"><link rel="stylesheet" href="/assets/style.css">
-<script src="/assets/nav.js" defer></script><title>SEX123 · Navigation</title>
+<script src="/assets/nav.js" defer></script><title>NTRSP · 永久地址发布页 | SEX123.TOP</title>
 </head>
-<body class="nav-page">
+<body class="nav-page publisher-page">
 <div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
 <div class="shell">
 <header class="topbar">
-<a class="brand" href="/" aria-label="SEX123 Navigation 首页"><span class="brand-mark">S<span>✳</span></span><span class="brand-word">SEX<span>123</span><small>NAVIGATION</small></span></a>
-<div class="top-actions"><span class="live-dot"></span><span class="top-label">独立导航镜像</span><a class="ghost-link" href="https://sex123.top/" rel="noreferrer">永久入口 ↗</a></div>
+<a class="brand" href="/" aria-label="NTRSP 永久地址发布页"><span class="brand-mark">N<span>✳</span></span><span class="brand-word">NTRSP<small>ADDRESS PUBLISHER</small></span></a>
+<div class="top-actions"><span class="live-dot"></span><span class="top-label">NTRSP 官方地址发布页</span><a class="ghost-link" href="https://sex123.top/" rel="noreferrer">永久入口 ↗</a></div>
 </header>
 <main>
-<section class="hero" aria-labelledby="hero-title">
-<p class="eyebrow"><span class="eyebrow-line"></span> YOUR GATEWAY TO MORE</p>
-<h1 id="hero-title">一个入口，<br><span>连接更多精彩。</span></h1>
-<p class="hero-desc">从这里探索各个项目。每个站点都有自己的访问线路，进入时自动尝试选择响应更快的可用地址。</p>
-<div class="hero-bottom"><span class="hero-chip">◉ &nbsp;多线路导航</span><span class="hero-chip">↗ &nbsp;智能跳转</span><span class="hero-chip">◇ &nbsp;轻量 · 纯前端</span></div>
-<span class="hero-number" aria-hidden="true">01 / NAV</span>
+<section class="hero publisher-hero" aria-labelledby="hero-title">
+  <p class="eyebrow"><span class="eyebrow-line"></span> OFFICIAL ADDRESS RELEASE</p>
+  <h1 id="hero-title">NTRSP<br><span>永久地址发布页</span></h1>
+  <p class="hero-desc">收藏永久入口 <strong>SEX123.TOP</strong>，随时获取 NTRSP 最新可用地址。页面自动检测主站与备用域名，并推荐本次探测响应较快的线路。</p>
+  <div class="hero-bottom"><span class="hero-chip">◉ &nbsp;自动测速</span><span class="hero-chip">↗ &nbsp;一键访问</span><span class="hero-chip">◇ &nbsp;主备域名</span></div>
+  <span class="hero-number" aria-hidden="true">NTRSP / ACCESS</span>
 </section>
-<section class="directory" aria-labelledby="directory-title">
-<div class="section-heading"><div><p class="section-overline">DIRECTORY / 项目索引</p><h2 id="directory-title">探索项目 <span id="project-count" class="count">—</span></h2></div><div class="search-wrap"><label class="sr-only" for="project-search">搜索项目</label><span aria-hidden="true">⌕</span><input id="project-search" type="search" placeholder="搜索项目名称" autocomplete="off"></div></div>
-<div id="category-filters" class="filters" role="group" aria-label="项目分类"></div>
-<div id="project-grid" class="project-grid" aria-live="polite"><div class="empty-state">正在加载项目列表…</div></div>
+<section class="publisher-main" aria-label="线路测速与推荐">
+  <div class="section-heading">
+    <div><p class="section-overline">RECOMMENDED / 智能推荐</p><h2>当前推荐地址</h2></div>
+    <button id="refresh-routes" class="refresh-button" type="button"><span aria-hidden="true">↻</span> 重新检测</button>
+  </div>
+  <div class="recommended-card" id="recommended-card">
+    <div class="recommended-header"><span class="recommend-kicker">本次推荐线路</span><span id="recommend-state" class="status-tag">等待检测</span></div>
+    <h3 id="recommend-domain">正在检测线路…</h3>
+    <p id="recommend-detail" role="status" aria-live="polite">正在读取主站与备用域名配置。</p>
+    <div class="recommend-actions">
+      <a id="recommend-enter" class="recommended-button is-disabled" aria-disabled="true">检测后显示推荐入口 ↗</a>
+      <button id="recommend-copy" class="copy-button" type="button" disabled>复制地址</button>
+    </div>
+  </div>
+  <div class="route-heading-row">
+    <div><p class="section-overline">ALL ROUTES / 全部地址</p><h2>全部可用线路</h2></div>
+    <p id="check-summary" class="check-summary" aria-live="polite">正在准备检测…</p>
+  </div>
+  <div id="route-list" class="publisher-routes" aria-live="polite"><p class="empty-state">正在加载线路…</p></div>
+  <p class="latency-legend"><span class="legend-fast">●</span> ≤280ms 流畅 <span class="legend-normal">●</span> 280–800ms 一般 <span class="legend-slow">●</span> &gt;800ms / 超时 较慢</p>
+  <div class="publisher-tips">
+    <strong>温馨提示</strong>
+    <p>建议将 <a href="https://sex123.top/" rel="noreferrer">sex123.top</a> 收藏到浏览器，防止失联。若某个地址无法打开，可选择另一条线路，或更换网络后重新检测。</p>
+    <p>测速结果来自浏览器加载静态图片的响应时间，不能保证整站业务功能完全可用；检测失败不等于网站一定无法访问。</p>
+  </div>
 </section>
-<section class="info-strip" aria-label="使用提示"><div><strong>多平台镜像</strong><p>本站在多个平台部署，访问异常时可切换下方镜像。</p></div><div><strong>智能线路</strong><p>线路检测仅作为访问参考，任何时候都可手动选择。</p></div><div><strong>永久入口</strong><p>建议收藏 sex123.top，以便随时找回导航中心。</p></div></section>
 </main>
-<footer class="footer"><div class="footer-brand">SEX123 <span>/ NAVIGATION</span></div><div id="mirror-links" class="mirror-links" aria-label="备用导航镜像"></div><div class="copyright">© 2026 SEX123 · Independent Navigation Network</div></footer>
+<footer class="footer"><div class="footer-brand">NTRSP <span>/ ADDRESS PUBLISHER</span></div><div id="mirror-links" class="mirror-links" aria-label="备用导航镜像"></div><div class="copyright">© 2026 NTRSP · 永久入口 sex123.top · 线路延迟仅供参考</div></footer>
 </div>
 </body>
 </html>
